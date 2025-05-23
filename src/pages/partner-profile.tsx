@@ -7,13 +7,39 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/common/page-header';
+import { Trophy, Medal, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { formatCurrency, formatPercent } from '@/lib/format';
 
 export function PartnerProfile() {
   const { profile, updateProfile } = usePartnerPortal();
   const [localProfile, setLocalProfile] = useState(profile);
   
+  // Competitiveness score calculation (mock data - would be API-driven in production)
+  const competitivenessScore = 87;
+  const marketRank = 3;
+  const totalPartners = 47;
+  const scoreChange = "+5";
+  
+  // Projected metrics based on current parameters
+  const projectedMetrics = {
+    monthlyVolume: 8200000,
+    opportunities: { min: 12, max: 15 },
+    competitivePercentile: 78,
+    riskProfileMatch: 65,
+    optimizedVolume: 12100000,
+    optimizedRank: 2,
+  };
+
+  // Market benchmarks
+  const marketBenchmarks = {
+    seniorDebt: 6.2,
+    mezzanine: 9.1,
+    equity: 14.3,
+  };
+
   const handleSave = () => {
     updateProfile(localProfile);
     toast({
@@ -33,6 +59,29 @@ export function PartnerProfile() {
   
   const utilizationPercentage = (localProfile.balanceSheetCapacity.currentUtilization / 
     localProfile.balanceSheetCapacity.totalCapacity) * 100;
+
+  const getCompetitivenessIcon = (score: number) => {
+    if (score >= 85) return <Trophy className="w-6 h-6 text-yellow-500" />;
+    if (score >= 70) return <Medal className="w-6 h-6 text-gray-400" />;
+    return <Medal className="w-6 h-6 text-amber-700" />;
+  };
+
+  const getRateComparisonBadge = (rate: number, benchmark: number) => {
+    const diff = rate - benchmark;
+    if (Math.abs(diff) < 0.1) return null;
+    
+    return diff > 0 ? (
+      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 flex gap-1 items-center">
+        <AlertTriangle className="w-3 h-3" />
+        Above market median
+      </Badge>
+    ) : (
+      <Badge variant="outline" className="bg-green-50 text-green-700 flex gap-1 items-center">
+        <CheckCircle2 className="w-3 h-3" />
+        Competitive rate
+      </Badge>
+    );
+  };
   
   return (
     <div className="space-y-6">
@@ -40,7 +89,45 @@ export function PartnerProfile() {
         title="Partner Profile & Lending Parameters"
         description="Configure your lending parameters to match your risk appetite and portfolio objectives."
       />
-      
+
+      {/* Competitiveness Score Card */}
+      <Card className="bg-gradient-to-br from-slate-900 to-slate-800">
+        <CardContent className="pt-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="flex items-center gap-4">
+              {getCompetitivenessIcon(competitivenessScore)}
+              <div>
+                <h3 className="text-3xl font-bold text-white">{competitivenessScore}</h3>
+                <p className="text-slate-300">Competitiveness Score</p>
+              </div>
+              <Badge className="bg-green-100 text-green-800 flex gap-1">
+                <TrendingUp className="w-4 h-4" />
+                {scoreChange} points
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <p className="text-slate-300">
+                Rank #{marketRank} of {totalPartners} active partners
+              </p>
+              <div className="flex gap-4">
+                <div>
+                  <p className="text-sm text-slate-400">Projected Volume</p>
+                  <p className="text-lg font-semibold text-white">
+                    {formatCurrency(projectedMetrics.monthlyVolume)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400">Expected Opportunities</p>
+                  <p className="text-lg font-semibold text-white">
+                    {projectedMetrics.opportunities.min}-{projectedMetrics.opportunities.max}/mo
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader className="bg-muted/30">
@@ -153,9 +240,12 @@ export function PartnerProfile() {
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <Label>Senior Debt</Label>
-                  <span className="text-sm font-medium">{localProfile.yieldRequirements.seniorDebt.minimum}% APR minimum</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{localProfile.yieldRequirements.seniorDebt.minimum}% APR minimum</span>
+                    {getRateComparisonBadge(localProfile.yieldRequirements.seniorDebt.minimum, marketBenchmarks.seniorDebt)}
+                  </div>
                 </div>
                 <Slider
                   value={[localProfile.yieldRequirements.seniorDebt.minimum]}
@@ -175,12 +265,19 @@ export function PartnerProfile() {
                     });
                   }}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Market range: 5.8% - 6.8%</span>
+                  <span>Median: {marketBenchmarks.seniorDebt}%</span>
+                </div>
               </div>
               
               <div className="space-y-2">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <Label>Mezzanine</Label>
-                  <span className="text-sm font-medium">{localProfile.yieldRequirements.mezzanine.minimum}% APR minimum</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{localProfile.yieldRequirements.mezzanine.minimum}% APR minimum</span>
+                    {getRateComparisonBadge(localProfile.yieldRequirements.mezzanine.minimum, marketBenchmarks.mezzanine)}
+                  </div>
                 </div>
                 <Slider
                   value={[localProfile.yieldRequirements.mezzanine.minimum]}
@@ -200,12 +297,19 @@ export function PartnerProfile() {
                     });
                   }}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Market range: 8.5% - 10.5%</span>
+                  <span>Median: {marketBenchmarks.mezzanine}%</span>
+                </div>
               </div>
               
               <div className="space-y-2">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <Label>Equity</Label>
-                  <span className="text-sm font-medium">{localProfile.yieldRequirements.equity.minimum}% IRR minimum</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{localProfile.yieldRequirements.equity.minimum}% IRR minimum</span>
+                    {getRateComparisonBadge(localProfile.yieldRequirements.equity.minimum, marketBenchmarks.equity)}
+                  </div>
                 </div>
                 <Slider
                   value={[localProfile.yieldRequirements.equity.minimum]}
@@ -225,16 +329,44 @@ export function PartnerProfile() {
                     });
                   }}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Market range: 13.5% - 16.5%</span>
+                  <span>Median: {marketBenchmarks.equity}%</span>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center justify-between text-xs text-muted-foreground p-2 bg-muted rounded-md">
-              <span>Market Benchmarks:</span>
-              <span>Senior 6.2% | Mezz 9.1% | Equity 14.3%</span>
-            </div>
+
+            {/* What-if Scenario */}
+            <Card className="bg-muted/20 border-dashed">
+              <CardContent className="pt-4">
+                <h4 className="text-sm font-semibold mb-2">Opportunity Impact Analysis</h4>
+                <p className="text-sm text-muted-foreground mb-3">
+                  If you decreased Senior Debt rate by 0.5%:
+                </p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Volume would increase to:</p>
+                    <p className="font-medium flex items-center gap-1">
+                      {formatCurrency(projectedMetrics.optimizedVolume)}
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        +47%
+                      </Badge>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Rank would improve to:</p>
+                    <p className="font-medium">
+                      #{projectedMetrics.optimizedRank} of {totalPartners}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
-        
+
+        {/* Rest of the existing cards... */}
+        {/* Risk Profile Preferences Card */}
         <Card>
           <CardHeader className="bg-muted/30">
             <CardTitle>Risk Profile Preferences</CardTitle>
@@ -314,6 +446,7 @@ export function PartnerProfile() {
           </CardContent>
         </Card>
         
+        {/* Collateral Type Support Card */}
         <Card>
           <CardHeader className="bg-muted/30">
             <CardTitle>Collateral Type Support</CardTitle>
@@ -508,6 +641,56 @@ export function PartnerProfile() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Market Intelligence Card */}
+      <Card className="bg-muted/10">
+        <CardHeader>
+          <CardTitle>Market Intelligence</CardTitle>
+          <CardDescription>Current market trends and opportunities</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Market Insights</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <TrendingUp className="w-4 h-4 text-green-500 mt-1" />
+                  <span>Most partners target {marketBenchmarks.seniorDebt}-{(marketBenchmarks.seniorDebt + 0.6).toFixed(1)}% for Senior Debt</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500 mt-1" />
+                  <span>You're in the top 25% for Mezzanine rates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-500 mt-1" />
+                  <span>Consider enabling Business Assets collateral - only 30% of partners accept this</span>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Achievement Progress</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Badge className="bg-yellow-100 text-yellow-800">Volume Leader</Badge>
+                  <p className="text-xs text-muted-foreground">Top 10% monthly volume</p>
+                </div>
+                <div className="space-y-1">
+                  <Badge className="bg-green-100 text-green-800">Quick Responder</Badge>
+                  <p className="text-xs text-muted-foreground">Under 2-hour response time</p>
+                </div>
+                <div className="space-y-1">
+                  <Badge className="bg-blue-100 text-blue-800">Portfolio Pro</Badge>
+                  <p className="text-xs text-muted-foreground">Balanced risk profiles</p>
+                </div>
+                <div className="space-y-1">
+                  <Badge className="bg-purple-100 text-purple-800">Growth Partner</Badge>
+                  <p className="text-xs text-muted-foreground">+20% volume MoM</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       <div className="flex justify-end gap-4">
         <Button variant="outline" onClick={handleReset}>Reset to Defaults</Button>
