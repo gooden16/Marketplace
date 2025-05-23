@@ -10,8 +10,9 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/common/page-header';
-import { Trophy, Medal, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Trophy, Medal, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Flame, CircleDot, Zap } from 'lucide-react';
 import { formatCurrency, formatPercent } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 export function PartnerProfile() {
   const { profile, updateProfile } = usePartnerPortal();
@@ -40,6 +41,30 @@ export function PartnerProfile() {
     equity: 14.3,
   };
 
+  // Market heat map data
+  const marketHeatMap = {
+    seniorDebt: { demand: 'high', opportunities: 78, trend: '+12%' },
+    mezzanine: { demand: 'moderate', opportunities: 23, trend: '-5%' },
+    equity: { demand: 'low', opportunities: 12, trend: '+2%' },
+  };
+
+  // Achievement progress
+  const achievements = {
+    volumeLeader: { current: 8200000, target: 10000000, progress: 82 },
+    quickResponder: { current: 1.8, target: 1.0, progress: 90 },
+    portfolioPro: { current: 85, target: 90, progress: 94 },
+    growthPartner: { current: 20, target: 25, progress: 80 },
+  };
+
+  // Leaderboard data
+  const leaderboard = [
+    { name: 'Partner Alpha', score: 94 },
+    { name: 'Partner Beta', score: 89 },
+    { name: 'ABC Lending', score: 87 },
+    { name: 'Partner Delta', score: 85 },
+    { name: 'Partner Epsilon', score: 82 },
+  ];
+
   const handleSave = () => {
     updateProfile(localProfile);
     toast({
@@ -64,6 +89,26 @@ export function PartnerProfile() {
     if (score >= 85) return <Trophy className="w-6 h-6 text-yellow-500" />;
     if (score >= 70) return <Medal className="w-6 h-6 text-gray-400" />;
     return <Medal className="w-6 h-6 text-amber-700" />;
+  };
+
+  const getScoreBackground = (score: number) => {
+    if (score >= 85) return 'bg-gradient-to-br from-yellow-300 to-yellow-600';
+    if (score >= 70) return 'bg-gradient-to-br from-gray-300 to-gray-500';
+    if (score >= 50) return 'bg-gradient-to-br from-amber-600 to-amber-800';
+    return 'bg-gradient-to-br from-red-500 to-red-700';
+  };
+
+  const getDemandIndicator = (demand: string) => {
+    switch (demand.toLowerCase()) {
+      case 'high':
+        return <Flame className="w-5 h-5 text-red-500" />;
+      case 'moderate':
+        return <CircleDot className="w-5 h-5 text-yellow-500" />;
+      case 'low':
+        return <CircleDot className="w-5 h-5 text-blue-500" />;
+      default:
+        return null;
+    }
   };
 
   const getRateComparisonBadge = (rate: number, benchmark: number) => {
@@ -91,7 +136,7 @@ export function PartnerProfile() {
       />
 
       {/* Competitiveness Score Card */}
-      <Card className="bg-gradient-to-br from-slate-900 to-slate-800">
+      <Card className={cn("border-2", getScoreBackground(competitivenessScore))}>
         <CardContent className="pt-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="flex items-center gap-4">
@@ -124,6 +169,173 @@ export function PartnerProfile() {
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Market Heat Map */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Market Heat Map</CardTitle>
+          <CardDescription>Current market demand and opportunities</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-muted/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold">Senior Debt</h4>
+                  {getDemandIndicator(marketHeatMap.seniorDebt.demand)}
+                </div>
+                <p className="text-2xl font-bold mb-1">
+                  {marketHeatMap.seniorDebt.opportunities}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Available opportunities
+                </p>
+                <Badge className="mt-2 bg-green-100 text-green-800">
+                  {marketHeatMap.seniorDebt.trend}
+                </Badge>
+              </div>
+              
+              <div className="p-4 bg-muted/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold">Mezzanine</h4>
+                  {getDemandIndicator(marketHeatMap.mezzanine.demand)}
+                </div>
+                <p className="text-2xl font-bold mb-1">
+                  {marketHeatMap.mezzanine.opportunities}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Available opportunities
+                </p>
+                <Badge className="mt-2 bg-red-100 text-red-800">
+                  {marketHeatMap.mezzanine.trend}
+                </Badge>
+              </div>
+              
+              <div className="p-4 bg-muted/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold">Equity</h4>
+                  {getDemandIndicator(marketHeatMap.equity.demand)}
+                </div>
+                <p className="text-2xl font-bold mb-1">
+                  {marketHeatMap.equity.opportunities}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Available opportunities
+                </p>
+                <Badge className="mt-2 bg-green-100 text-green-800">
+                  {marketHeatMap.equity.trend}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Achievement Progress */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Achievement Progress</CardTitle>
+          <CardDescription>Track your progress towards key milestones</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>Volume Leader</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {formatCurrency(achievements.volumeLeader.current)} / {formatCurrency(achievements.volumeLeader.target)}
+                  </span>
+                </div>
+                <Progress value={achievements.volumeLeader.progress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formatCurrency(achievements.volumeLeader.target - achievements.volumeLeader.current)} to next level
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>Quick Responder</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {achievements.quickResponder.current}hr / {achievements.quickResponder.target}hr
+                  </span>
+                </div>
+                <Progress value={achievements.quickResponder.progress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {(achievements.quickResponder.current - achievements.quickResponder.target).toFixed(1)}hr to "Lightning Fast" status
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>Portfolio Pro</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {achievements.portfolioPro.current}% / {achievements.portfolioPro.target}%
+                  </span>
+                </div>
+                <Progress value={achievements.portfolioPro.progress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {achievements.portfolioPro.target - achievements.portfolioPro.current}% to balanced portfolio achievement
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>Growth Partner</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {achievements.growthPartner.current}% / {achievements.growthPartner.target}%
+                  </span>
+                </div>
+                <Progress value={achievements.growthPartner.progress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {achievements.growthPartner.target - achievements.growthPartner.current}% growth needed
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Leaderboard */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Partner Leaderboard</CardTitle>
+          <CardDescription>Top performing partners this month</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {leaderboard.map((partner, index) => (
+              <div
+                key={partner.name}
+                className={cn(
+                  "flex items-center justify-between p-4 rounded-lg",
+                  partner.name === 'ABC Lending' ? 'bg-primary/10 border border-primary' : 'bg-muted/20'
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  {index === 0 && <Trophy className="w-5 h-5 text-yellow-500" />}
+                  {index === 1 && <Medal className="w-5 h-5 text-gray-400" />}
+                  {index === 2 && <Medal className="w-5 h-5 text-amber-700" />}
+                  <span className={cn(
+                    "font-medium",
+                    partner.name === 'ABC Lending' && "text-primary"
+                  )}>
+                    {partner.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">{partner.score}</span>
+                  {partner.name === 'ABC Lending' && (
+                    <Badge className="bg-primary/20 text-primary">You</Badge>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -365,7 +577,6 @@ export function PartnerProfile() {
           </CardContent>
         </Card>
 
-        {/* Rest of the existing cards... */}
         {/* Risk Profile Preferences Card */}
         <Card>
           <CardHeader className="bg-muted/30">
@@ -508,7 +719,7 @@ export function PartnerProfile() {
                     <Input
                       type="number"
                       value={localProfile.collateralSupport.realEstate.advanceRate}
-                      onChange={(e) => {
+                      onChange={(e) =>  {
                         const value = Number(e.target.value);
                         setLocalProfile({
                           ...localProfile,
