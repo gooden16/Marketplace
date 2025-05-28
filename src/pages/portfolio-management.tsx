@@ -104,7 +104,7 @@ export function PortfolioManagement() {
     }
 
     if (hasHalfStar) {
-      stars.push(<StarHalf key="half" className="w-4 h-4 fill-primary text-primary" />);
+      stars.push(<StarHalf key="half\" className="w-4 h-4 fill-primary text-primary" />);
     }
 
     return <div className="flex gap-1">{stars}</div>;
@@ -131,25 +131,25 @@ export function PortfolioManagement() {
       />
 
       {/* Portfolio Health Score */}
-      <Card className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-500/30">
+      <Card className="bg-gradient-to-r from-primary/10 via-primary/20 to-primary/30 border-primary/20">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-serif">Portfolio Health Score</h3>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="text-4xl font-bold text-green-400">{healthScore.current}</div>
-                <div className="text-green-400">
-                  <span className="flex items-center gap-1">
+              <h3 className="text-xl font-serif text-foreground">Portfolio Health Score</h3>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-5xl font-bold text-primary">{healthScore.current}</div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1 text-primary">
                     <ArrowUpRight className="w-4 h-4" />
-                    +{healthScore.change} this month
-                  </span>
+                    <span>+{healthScore.change} this month</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Top {100 - healthScore.percentile}% of all portfolio managers
+                  </div>
                 </div>
               </div>
             </div>
-            <Trophy className="w-12 h-12 text-yellow-500" />
-          </div>
-          <div className="mt-4 text-sm text-gray-300">
-            Top {100 - healthScore.percentile}% of all portfolio managers
+            <Trophy className="w-16 h-16 text-primary" />
           </div>
         </CardContent>
       </Card>

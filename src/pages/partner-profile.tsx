@@ -86,13 +86,13 @@ export function PartnerProfile() {
     localProfile.balanceSheetCapacity.totalCapacity) * 100;
 
   const getCompetitivenessIcon = (score: number) => {
-    if (score >= 85) return <Trophy className="w-6 h-6 text-yellow-500" />;
+    if (score >= 85) return <Trophy className="w-6 h-6 text-primary" />;
     if (score >= 70) return <Medal className="w-6 h-6 text-gray-400" />;
     return <Medal className="w-6 h-6 text-amber-700" />;
   };
 
   const getScoreBackground = (score: number) => {
-    if (score >= 85) return 'bg-gradient-to-br from-yellow-300 to-yellow-600';
+    if (score >= 85) return 'bg-gradient-to-br from-primary/10 via-primary/20 to-primary/30';
     if (score >= 70) return 'bg-gradient-to-br from-gray-300 to-gray-500';
     if (score >= 50) return 'bg-gradient-to-br from-amber-600 to-amber-800';
     return 'bg-gradient-to-br from-red-500 to-red-700';
@@ -116,7 +116,7 @@ export function PartnerProfile() {
     if (Math.abs(diff) < 0.1) return null;
     
     return diff > 0 ? (
-      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 flex gap-1 items-center">
+      <Badge variant="outline\" className="bg-yellow-50 text-yellow-700 flex gap-1 items-center">
         <AlertTriangle className="w-3 h-3" />
         Above market median
       </Badge>
@@ -136,38 +136,32 @@ export function PartnerProfile() {
       />
 
       {/* Competitiveness Score Card */}
-      <Card className={cn("border-2", getScoreBackground(competitivenessScore))}>
+      <Card className={cn(
+        "border border-primary/20",
+        getScoreBackground(competitivenessScore)
+      )}>
         <CardContent className="pt-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-4">
-              {getCompetitivenessIcon(competitivenessScore)}
-              <div>
-                <h3 className="text-3xl font-bold text-white">{competitivenessScore}</h3>
-                <p className="text-slate-300">Competitiveness Score</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-serif text-foreground">Competitiveness Score</h3>
+              <div className="flex items-center gap-4 mt-3">
+                <div className="text-5xl font-bold text-primary">{competitivenessScore}</div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1 text-primary">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>+{scoreChange} points</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Rank #{marketRank} of {totalPartners} active partners
+                  </div>
+                </div>
               </div>
-              <Badge className="bg-green-100 text-green-800 flex gap-1">
-                <TrendingUp className="w-4 h-4" />
-                {scoreChange} points
-              </Badge>
             </div>
-            <div className="space-y-2">
-              <p className="text-slate-300">
-                Rank #{marketRank} of {totalPartners} active partners
-              </p>
-              <div className="flex gap-4">
-                <div>
-                  <p className="text-sm text-slate-400">Projected Volume</p>
-                  <p className="text-lg font-semibold text-white">
-                    {formatCurrency(projectedMetrics.monthlyVolume)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-400">Expected Opportunities</p>
-                  <p className="text-lg font-semibold text-white">
-                    {projectedMetrics.opportunities.min}-{projectedMetrics.opportunities.max}/mo
-                  </p>
-                </div>
-              </div>
+            <div className="flex flex-col items-center gap-2">
+              <Trophy className="w-16 h-16 text-primary" />
+              <span className="text-sm text-muted-foreground">
+                Top {100 - projectedMetrics.competitivePercentile}%
+              </span>
             </div>
           </div>
         </CardContent>
@@ -318,7 +312,7 @@ export function PartnerProfile() {
                 )}
               >
                 <div className="flex items-center gap-3">
-                  {index === 0 && <Trophy className="w-5 h-5 text-yellow-500" />}
+                  {index === 0 && <Trophy className="w-5 h-5 text-primary" />}
                   {index === 1 && <Medal className="w-5 h-5 text-gray-400" />}
                   {index === 2 && <Medal className="w-5 h-5 text-amber-700" />}
                   <span className={cn(
@@ -719,13 +713,14 @@ export function PartnerProfile() {
                     <Input
                       type="number"
                       value={localProfile.collateralSupport.realEstate.advanceRate}
-                      onChange={(e) =>  {
+                      onChange={(e) => {
                         const value = Number(e.target.value);
                         setLocalProfile({
                           ...localProfile,
                           collateralSupport: {
                             ...localProfile.collateralSupport,
                             realEstate: {
+                              
                               ...localProfile.collateralSupport.realEstate,
                               advanceRate: value,
                             },
